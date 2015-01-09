@@ -1,0 +1,9 @@
+{
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mu-lib/mu-data.git"
+	},
+	"devDependencies": {
+		"buster-amd": "~0.3"
+	}
+}
