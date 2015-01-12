@@ -1,4 +1,4 @@
-define([ "../../cache/sweep" ], function (sweep) {
+define([ "../../cache/purge" ], function (purge) {
 
 	var assert = buster.referee.assert;
 	var refute = buster.referee.refute;
@@ -7,7 +7,7 @@ define([ "../../cache/sweep" ], function (sweep) {
 	var GENERATIONS = "generations";
 	var INDEXED = "indexed";
 
-	buster.testCase("mu-data/index/sweep", {
+	buster.testCase("mu-data/index/purge", {
 		"setUp": function () {
 			var me = this;
 
@@ -51,10 +51,10 @@ define([ "../../cache/sweep" ], function (sweep) {
 				var generations = me[GENERATIONS];
 				var indexed = me[INDEXED];
 
-				sweep(indexed, target, generations);
+				purge(indexed, target, generations);
 				assert.defined(target["one"], "target.one should cache for one generation");
 
-				sweep(indexed + 1050, target, generations);
+				purge(indexed + 1050, target, generations);
 				refute.defined(target["one"], "target.one should expire after one generation");
 			},
 
@@ -64,10 +64,10 @@ define([ "../../cache/sweep" ], function (sweep) {
 				var generations = me[GENERATIONS];
 				var indexed = me[INDEXED];
 
-				sweep(indexed + 1000, target, generations);
+				purge(indexed + 1000, target, generations);
 				assert.defined(target["two"], "target.two should cache for one generation");
 
-				sweep(indexed + 2050, target, generations);
+				purge(indexed + 2050, target, generations);
 				refute.defined(target["two"], "target.two should expire after two generations");
 			}
 		}

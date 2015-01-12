@@ -1,8 +1,8 @@
 define([
 	"./put",
-	"./sweep",
+	"./purge",
 	"poly/object"
-], function (put, sweep) {
+], function (put, purge) {
 	"use strict";
 
 	return function factory(target) {
@@ -17,7 +17,7 @@ define([
 
 			"sweep": {
 				"value": function (expires) {
-					return sweep(expires, target, generations);
+					return purge(expires, target, generations);
 				}
 			}
 		});

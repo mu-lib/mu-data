@@ -7,7 +7,7 @@ define([ "./config" ], function (config) {
 
 	var NODE_EXPIRES = config.expires;
 
-	return function sweep(timestamp, target, generations) {
+	return function purge(timestamp, target, generations) {
 		var property;
 		var current;
 		var expires = 0 | timestamp / 1000;
