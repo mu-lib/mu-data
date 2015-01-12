@@ -207,14 +207,14 @@ define([ "./config" ], function (config) {
 		return node_cache;
 	}
 
-	return function put(node, target, generations, now) {
+	return function put(node, target, generations, timestamp) {
 		var constructor = node === NULL || node === UNDEFINED
 			? UNDEFINED
 			: node[CONSTRUCTOR];
 
 		// Do magic comparison to see if we should index this object
 		return constructor === Object || constructor === Array && node[LENGTH] !== 0
-			? index(node, target, generations, 0 | (now || new Date().getTime()) / 1000, constructor)
+			? index(node, target, generations, 0 | (timestamp || new Date().getTime()) / 1000, constructor)
 			: node;
 }
 });
