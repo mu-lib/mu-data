@@ -1,6 +1,6 @@
 define([ "../../query/reduce" ], function (reduce) {
 
-	var TARGET = "target";
+	var CACHE = "cache";
 	var INDEXED = "indexed";
 
 	var assert = buster.referee.assert;
@@ -10,15 +10,15 @@ define([ "../../query/reduce" ], function (reduce) {
 			"setUp": function () {
 				var me = this;
 
-				var target = me[TARGET] = {};
+				var cache = me[CACHE] = {};
 
-				target["test!xxx"] = {
+				cache["test!xxx"] = {
 					"id": "test!xxx",
 					"collapsed": true,
 					"indexed": 1420793748
 				};
 
-				target["test!zzz"] = {
+				cache["test!zzz"] = {
 					"id": "test!zzz",
 					"collapsed": false,
 					"indexed": 1420793748,
@@ -26,13 +26,13 @@ define([ "../../query/reduce" ], function (reduce) {
 					"expires": 1420793758
 				};
 
-				target["test!abc"] = {
+				cache["test!abc"] = {
 					"id": "test!abc",
 					"collapsed": true,
 					"indexed": 1420793748
 				};
 
-				target["test!yyy"] = {
+				cache["test!yyy"] = {
 					"id": "test!yyy",
 					"collapsed": false,
 					"indexed": 1420793748,
@@ -40,23 +40,23 @@ define([ "../../query/reduce" ], function (reduce) {
 					"expires": 1420793758
 				};
 
-				target["test!321"] = {
+				cache["test!321"] = {
 					"id": "test!321",
 					"collapsed": false,
 					"indexed": 1420793748,
 					"maxAge": 10,
-					"p2": target["test!yyy"],
+					"p2": cache["test!yyy"],
 					"expires": 1420793758
 				};
 
-				target["test!123"] = {
+				cache["test!123"] = {
 					"id": "test!123",
 					"collapsed": false,
 					"maxAge": 10,
-					"p1": target["test!321"],
-					"px": [ target["test!zzz"], target["test!abc"] ],
-					"py": [ target["test!zzz"] ],
-					"p3": target["test!xxx"],
+					"p1": cache["test!321"],
+					"px": [ cache["test!zzz"], cache["test!abc"] ],
+					"py": [ cache["test!zzz"] ],
+					"p3": cache["test!xxx"],
 					"indexed": 1420793748,
 					"expires": 1420793758
 				};
@@ -73,7 +73,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "test!123",
 						"raw": "test!123"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, []);
 			},
@@ -86,7 +86,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "test!1234",
 						"raw": "test!1234"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, [{
 					"op": "!",
@@ -109,7 +109,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "p1",
 						"raw": "p1"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, []);
 			},
@@ -127,7 +127,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "p2",
 						"raw": "p2"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, [{
 					"op": "!",
@@ -160,7 +160,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "p2",
 						"raw": "p2"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, []);
 			},
@@ -188,7 +188,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "p3",
 						"raw": "p3"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, [{
 					"op": "!",
@@ -221,7 +221,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "p2",
 						"raw": "p2"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, [{
 					"op": "!",
@@ -269,7 +269,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "p2",
 						"raw": "p2"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, [{
 					"op": "!",
@@ -312,7 +312,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "test!321",
 						"raw": "test!321"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, []);
 			},
@@ -360,7 +360,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "p2",
 						"raw": "p2"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, [{
 					"op": "!",
@@ -393,7 +393,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "px",
 						"raw": "px"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, [{
 					"op": "!",
@@ -421,7 +421,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "py",
 						"raw": "py"
 					}
-				], me[TARGET], me[INDEXED]);
+				], me[CACHE], me[INDEXED]);
 
 				assert.equals(ast, [{
 					"op": "!",
@@ -441,7 +441,7 @@ define([ "../../query/reduce" ], function (reduce) {
 			"setUp": function () {
 				var me = this;
 
-				var target = me[TARGET] = {};
+				var target = me[CACHE] = {};
 
 				target["test!xxx"] = {
 					"id": "test!xxx",
@@ -483,7 +483,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "test!321",
 						"raw": "test!321"
 					}
-				], me[TARGET], me[INDEXED] + 1000);
+				], me[CACHE], me[INDEXED] + 1000);
 
 				assert.equals(ast, [{
 					"op" : "!",
@@ -506,7 +506,7 @@ define([ "../../query/reduce" ], function (reduce) {
 						"text": "p2",
 						"raw": "p2"
 					}
-				], me[TARGET], me[INDEXED] + 1000);
+				], me[CACHE], me[INDEXED] + 1000);
 
 				assert.equals(ast, [{
 					"op" : "!",

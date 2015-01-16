@@ -6,7 +6,7 @@ define([
 	var assert = buster.referee.assert;
 	var refute = buster.referee.refute;
 
-	var TARGET = "target";
+	var CACHE = "cache";
 	var GENERATIONS = "generations";
 	var INDEXED = "indexed";
 	var EXPIRES = "expires";
@@ -16,8 +16,8 @@ define([
 		"setUp": function () {
 			var me = this;
 
-			// Initialize `me[TARGET]` and `me[GENERATIONS]`
-			me[TARGET] = {};
+			// Initialize `me[CACHE]` and `me[GENERATIONS]`
+			me[CACHE] = {};
 			me[GENERATIONS] = {};
 		},
 
@@ -48,14 +48,14 @@ define([
 							"collapsed": true
 						}
 					}
-				}], me[TARGET], me[GENERATIONS]);
+				}], me[CACHE], me[GENERATIONS]);
 			},
 
 			"indexing works as expected": function () {
-				var target = this[TARGET];
-				var one = target["one"];
-				var two = target["two"];
-				var three = target["three"];
+				var cache = this[CACHE];
+				var one = cache["one"];
+				var two = cache["two"];
+				var three = cache["three"];
 
 				var _two = {
 					"id": "two",
@@ -84,25 +84,25 @@ define([
 			},
 
 			"'one' is defined": function () {
-				assert.defined(this[TARGET]["one"]);
+				assert.defined(this[CACHE]["one"]);
 			},
 
 			"'one.two' is same as 'two'": function () {
-				var target = this[TARGET];
+				var cache = this[CACHE];
 
-				assert.same(target["one"]["two"], target["two"]);
+				assert.same(cache["one"]["two"], cache["two"]);
 			},
 
 			"properties of 'one' are pruned after update": function () {
 				var me = this;
-				var target = me[TARGET];
-				var one = target["one"];
+				var cache = me[CACHE];
+				var one = cache["one"];
 
-				// Update target with a non-collapsed object.
+				// Update `cache` with a non-collapsed object.
 				put({
 					"id": "one",
 					"collapsed": false
-				}, target, me[GENERATIONS]);
+				}, cache, me[GENERATIONS]);
 
 				// `one["two"]` should be pruned.
 				refute.defined(one["two"]);
@@ -116,11 +116,11 @@ define([
 				// Set `me[TIMEOUT]` to `1.5sec`
 				me[TIMEOUT] = 1500;
 
-				// Put `foo` in `me[TARGET]`
+				// Put `foo` in `me[CACHE]`
 				var foo = put({
 					"id" : "foo",
 					"maxAge" : 10
-				}, me[TARGET], me[GENERATIONS]);
+				}, me[CACHE], me[GENERATIONS]);
 
 				// Save the last index.
 				me[INDEXED] = foo[INDEXED];
@@ -132,10 +132,10 @@ define([
 			"fresh put" : function () {
 				var me = this;
 
-				// Put `bar` in `me[TARGET]`
+				// Put `bar` in `me[CACHE]`
 				var bar = put({
 					id: "bar"
-				}, me[TARGET], me[GENERATIONS]);
+				}, me[CACHE], me[GENERATIONS]);
 
 				assert(bar[INDEXED] > me[INDEXED]);
 			},
@@ -143,10 +143,10 @@ define([
 			"update put" : function () {
 				var me = this;
 
-				// Put `foo` in `me[TARGET]`
+				// Put `foo` in `me[CACHE]`
 				var foo = put({
 					id: "foo"
-				}, me[TARGET], me[GENERATIONS]);
+				}, me[CACHE], me[GENERATIONS]);
 
 				assert(foo[INDEXED] > me[INDEXED]);
 			}
