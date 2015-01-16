@@ -18,7 +18,7 @@ define([ "./config" ], function (config) {
 	var NODE_INDEXED = config.indexed;
 	var NODE_COLLAPSED = config.collapsed;
 
-	function index(node_index, target, generations, indexed, constructor) {
+	function index(node_input, cache, generations, indexed, constructor) {
 		var id;
 		var i;
 		var iMax;
@@ -32,173 +32,176 @@ define([ "./config" ], function (config) {
 		var value;
 		var node_cache;
 
-		// First add `node_index` to `target` (or get the already cached instance)
+		// Add `node_input` to `cache` (or get the already cached instance)
 
 		// Can't index if there is no `NODE_ID` property
-		if (!node_index.hasOwnProperty(NODE_ID)) {
-			// Reuse ref to `node_index` (avoids object creation)
-			node_cache = node_index;
+		if (!node_input.hasOwnProperty(NODE_ID)) {
+			node_cache = node_input;
 		}
 		else {
 			// Get NODE_ID
-			id = node_index[NODE_ID];
+			id = node_input[NODE_ID];
 
 			// Update NODE_INDEXED
-			node_index[NODE_INDEXED] = indexed;
+			node_input[NODE_INDEXED] = indexed;
 
-			// If `id` exists in `target` we use it ...
-			if (target.hasOwnProperty(id)) {
-				node_cache = target[id];
+			// If `id` exists in `cache` we use it ...
+			if (cache.hasOwnProperty(id)) {
+				node_cache = cache[id];
 
-				// Bypass collapsed object that already exists in `target`.
-				if(node_index[NODE_COLLAPSED] === TRUE) {
+				// If `node_input` is collapsed we should just return node_cache.
+				if(node_input[NODE_COLLAPSED] === TRUE) {
 					return node_cache;
 				}
 			}
 			// ... otherwise we add it
 			else {
-				// Reuse ref to `node_index` (avoids object creation)
-				node_cache = target[id] = node_index;
+				node_cache = cache[id] = node_input;
 			}
 		}
 
 		// We have to deep traverse the graph before we do any expiration (as more data for this object can be available)
 
-		// Check that this is an ARRAY
+		// Check if `constructor` ix an `ARRAY`
 		if (constructor === ARRAY) {
-			// Index all values
-			for (i = 0, iMax = node_index[LENGTH]; i < iMax; i++) {
+			// Loop `node_input`
+			for (i = 0, iMax = node_input[LENGTH]; i < iMax; i++) {
 
 				// Keep value
-				value = node_index[i];
+				value = node_input[i];
 
 				// Get constructor of value (safely, falling back to UNDEFINED)
 				constructor = value === NULL || value === UNDEFINED
 					? UNDEFINED
 					: value[CONSTRUCTOR];
 
-				// Do magic comparison to see if we recursively put this in the index, or plain put
+				// Do magic comparison to see if we recursively index this, or just store it as is
 				node_cache[i] = (constructor === OBJECT || constructor === ARRAY && value[LENGTH] !== 0)
-					? index(value, target, generations, indexed, constructor)
+					? index(value, cache, generations, indexed, constructor)
 					: value;
 			}
 		}
-		// Check that this is an OBJECT
+		// Check if `constructor` is an `OBJECT`
 		else if (constructor === OBJECT) {
-			// Check if _not_ NODE_COLLAPSED
-			if (node_index[NODE_COLLAPSED] === FALSE) {
-				// Prune properties from node_cache
+			// Make sure that `node_input` is not collapsed
+			if (node_input[NODE_COLLAPSED] === FALSE) {
+				// Prune properties from `node_cache`
 				for (property in node_cache) {
-					// Except the NODE_ID property
-					// and the NODE_COLLAPSED property
-					// and the NODE_EXPIRES property
-					// if property is _not_ present in node_index
+					// Except the `NODE_ID` property
+					// Except the `NODE_COLLAPSED` property
+					// Except the `NODE_EXPIRES` property
+					// Except if `property` is _not_ in `node_input`
 					if (property !== NODE_ID
 						&& property !== NODE_COLLAPSED
 						&& property !== NODE_EXPIRES
-						&& !(node_index.hasOwnProperty(property))) {
+						&& !(node_input.hasOwnProperty(property))) {
 						delete node_cache[property];
 					}
 				}
 			}
 
 			// Index all properties
-			for (property in node_index) {
-				// Except the NODE_ID property
-				// or the NODE_COLLAPSED property, if it's false
+			for (property in node_input) {
+				// Except the `NODE_ID` property
+				// Except the `NODE_COLLAPSED` property if equals `FALSE`
 				if (property === NODE_ID
 					|| (property === NODE_COLLAPSED && node_cache[NODE_COLLAPSED] === FALSE)) {
 					continue;
 				}
 
 				// Keep value
-				value = node_index[property];
+				value = node_input[property];
 
 				// Get constructor of value (safely, falling back to UNDEFINED)
 				constructor = value === NULL || value === UNDEFINED
 					? UNDEFINED
 					: value[CONSTRUCTOR];
 
-				// Do magic comparison to see if we recursively put this in the index, or plain put
+				// Do magic comparison to see if we recursively index this, or just store it as is
 				node_cache[property] = (constructor === OBJECT || constructor === ARRAY && value[LENGTH] !== 0)
-					? index(value, target, generations, indexed,  constructor)
+					? index(value, cache, generations, indexed,  constructor)
 					: value;
 			}
 		}
 
-		// Check if we need to move node_cache between generations
+		// Check if we need to move `node_cache` between generations
 		move : {
-			// Break fast if id is UNDEFINED
+			// Break fast if `id` is `UNDEFINED`
 			if (id === UNDEFINED) {
 				break move;
 			}
 
-			// Calculate expiration and floor
-			// '>>>' means convert anything other than positive integer into 0
+			// Calculate `expires`
+			// `0 |` floors
+			// `>>>` convert anything other than positive integer to `0`
 			expires = 0 | indexed + (node_cache[NODE_MAX_AGE] >>> 0);
 
 			remove : {
-				// Fail fast if there is no old expiration
-				if (!(NODE_EXPIRES in node_cache)) {
+				// Break `remove` if the is no `NODE_EXPIRES` on `node_cache`
+				if (!(node_cache.hasOwnProperty(NODE_EXPIRES))) {
 					break remove;
 				}
 
-				// Get current expiration
+				// Get expiration from `node_cache`
 				expired = node_cache[NODE_EXPIRES];
 
-				// If expiration has not changed, we can continue
+				// Break `move` if expiration has not changed
 				if (expired === expires) {
 					break move;
 				}
 
-				// Remove ref from generation (if that generation exists)
-				if (expired in generations) {
+				// If `generations` contains `expired`
+				if (generations.hasOwnProperty(expired)) {
+					// ... delete `id` ref from `generations[expired]`
 					delete generations[expired][id];
 				}
 			}
 
 			add : {
-				// Collapsed object should not be collected by GC.
+				// Break `add` if `node_cache` is collapsed
 				if(node_cache[NODE_COLLAPSED] === TRUE) {
 					break add;
 				}
 
-				// Update expiration time
+				// Update `node_cache[NODE_EXPIRES]`
 				node_cache[NODE_EXPIRES] = expires;
 
-				// Existing generation
-				if (expires in generations) {
-					// Add node_cache to generation
+				// If `generations` contains `expires` ...
+				if (generations.hasOwnProperty(expires)) {
+					// ... add `id` ref to `generations[expires]` ...
 					generations[expires][id] = node_cache;
+					// ... and break `add`
 					break add;
 				}
 
-				// Create generation with expiration set
+				// Create `generation` with `NODE_EXPIRES` set
 				(generation = generations[expires] = {})[NODE_EXPIRES] = expires;
 
-				// Add node_cache to generation
+				// Add `node_cache` to `generation`
 				generation[id] = node_cache;
 
-				// Short circuit if there is no head
+				// If `generations[HEAD]` is missing ...
 				if (generations[HEAD] === UNDEFINED) {
+					// ... store `generation` as `generations[HEAD]` ...
 					generations[HEAD] = generation;
+					// ... and break `add`
 					break add;
 				}
 
-				// Step through list as long as there is a next, and expiration is "older" than the next expiration
+				// Step through list as long as there is a `NEXT`, and `NODE_EXPIRES` is "older" than `expires`
 				for (current = head = generations[HEAD]; (next = current[NEXT]) !== UNDEFINED && next[NODE_EXPIRES] < expires; current = next);
 
-				// Check if we're still on the head and if we're younger
+				// If `current` equals `head` and current is younger ...
 				if (current === head && current[NODE_EXPIRES] > expires) {
-					// Next generation is the current one (head)
+					// ... link `current` to `generation[NEXT]` ...
 					generation[NEXT] = current;
-
-					// Reset head to new generation
+					// ... reset `generations[HEAD]` to `generation` ...
 					generations[HEAD] = generation;
+					// ... and break `add`
 					break add;
 				}
 
-				// Insert new generation between current and current.next
+				// Insert `generation` between `current` and `current[NEXT]`
 				generation[NEXT] = current[NEXT];
 				current[NEXT] = generation;
 			}
@@ -207,14 +210,16 @@ define([ "./config" ], function (config) {
 		return node_cache;
 	}
 
-	return function put(node, target, generations, timestamp) {
+	return function put(node, cache, generations, timestamp) {
 		var constructor = node === NULL || node === UNDEFINED
 			? UNDEFINED
 			: node[CONSTRUCTOR];
 
-		// Do magic comparison to see if we should index this object
+		// If `constructor` equals `Object` OR `Array` and `node[LENGTH]` is not `0` ...
 		return constructor === Object || constructor === Array && node[LENGTH] !== 0
-			? index(node, target, generations, 0 | (timestamp || new Date().getTime()) / 1000, constructor)
+			// ... return the result of indexing the node using `timestamp` or `new Date().getTime()` as a base to calculate `indexed` ...
+			? index(node, cache, generations, 0 | (timestamp || new Date().getTime()) / 1000, constructor)
+			// ... otherwise just return `node`
 			: node;
-}
+	}
 });

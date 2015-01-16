@@ -5,19 +5,20 @@ define([
 ], function (put, purge) {
 	"use strict";
 
-	return function factory(target) {
+	return function factory(source) {
 		var generations = {};
+		var cache = source || {};
 
-		return Object.create(target || {}, {
+		return Object.create(cache, {
 			"put": {
 				"value": function (node) {
-					return put(node, target, generations);
+					return put(node, cache, generations);
 				}
 			},
 
-			"sweep": {
+			"purge": {
 				"value": function (expires) {
-					return purge(expires, target, generations);
+					return purge(expires, cache, generations);
 				}
 			}
 		});

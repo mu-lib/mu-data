@@ -7,7 +7,7 @@ define([ "./config" ], function (config) {
 
 	var NODE_EXPIRES = config.expires;
 
-	return function purge(timestamp, target, generations) {
+	return function purge(timestamp, cache, generations) {
 		var property;
 		var current;
 		var expires = 0 | timestamp / 1000;
@@ -34,8 +34,8 @@ define([ "./config" ], function (config) {
 					continue;
 				}
 
-				// Delete `target[property]`
-				delete target[property];
+				// Delete `cache[property]`
+				delete cache[property];
 			}
 
 			// Delete generation
