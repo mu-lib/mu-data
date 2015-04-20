@@ -181,6 +181,16 @@ define([ "../../query/parse" ], function (parse) {
 			}]);
 		},
 
+		"test!'\"123 321\"'": function () {
+		    var ast = parse("test!'\"123 321\"'");
+
+		    assert.equals(ast, [{
+		        "op": "!",
+		        "text": "test!'\"123 321\"'",
+		        "raw": "test!\"123 321\""
+		    }]);
+		},
+
 		"test!'123 321'.p1,.'p2 asd'" : function () {
 			var ast = parse("test!'123 321'.p1,.'p2 asd'");
 
