@@ -35,7 +35,7 @@ define([ "./config" ], function (config) {
 										// Set / unset quote char
 					q = q === c
 						? UNDEFINED
-						: c;
+						: (q ? q : c);
 					break;
 
 				case OP_ID :
