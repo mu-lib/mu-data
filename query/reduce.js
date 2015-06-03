@@ -28,7 +28,7 @@ define([
 	var NODE_COLLAPSED = cache_config.collapsed;
 
 	return function reduce(ast, cache, timestamp) {
-		var expires = 0 | timestamp / 1000;
+		var expires = 0 | (timestamp || +new Date()) / 1000;
 
 		var result = []; // Result
 		var i;           // Index
